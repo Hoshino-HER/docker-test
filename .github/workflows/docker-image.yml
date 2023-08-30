@@ -12,16 +12,18 @@ jobs:
 
     env:
       DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+      REPO_NAME: ${{ vars.GITHUB_REPOSITORY }}
+      IMG_VER: "****"
 
     steps:
     - name: Pre check
       run: |
         echo "Precheck"
         REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
-        echo "Repository: $REPO_NAME"
-        IMG_VER=$(date +%Y%m%d%H%M)
-        echo "Image version: $IMG_VER"
-        echo "Docker username: $DOCKER_USERNAME"
+        echo "Repository: ${{ env.REPO_NAME }}"
+        set-env IMG_VER=$(date +%Y%m%d%H%M)
+        echo "Image version: ${{ env.IMG_VER }}"
+        echo "Docker username: ${{ env.DOCKER_USERNAME }}"
         echo "All environments: "
         env
         echo "Docker password (test): "
@@ -38,6 +40,9 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build . --file Dockerfile --tag $DOCKER_USERNAME/micropython-test:$IMG_VER
-        docker push $DOCKER_USERNAME/$REPO_NAME:$IMG_VER
-        docker push $DOCKER_USERNAME/$REPO_NAME:latest
+        set-env VERTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
+        set-env LATESTTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
+        docker build . --file Dockerfile --tag $VERTAG
+        docker image tag $VERTAG $LATESTTAG
+        docker push $VERTAG
+        docker push $LATESTTAG
