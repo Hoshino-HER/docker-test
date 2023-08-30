@@ -19,9 +19,9 @@ jobs:
     - name: Pre check
       run: |
         echo "Precheck"
-        REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
+        export REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
         echo "Repository: ${{ env.REPO_NAME }}"
-        set-env IMG_VER=$(date +%Y%m%d%H%M)
+        export IMG_VER=$(date +%Y%m%d%H%M)
         echo "Image version: ${{ env.IMG_VER }}"
         echo "Docker username: ${{ env.DOCKER_USERNAME }}"
         echo "All environments: "
@@ -40,8 +40,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        set-env VERTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
-        set-env LATESTTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
+        export VERTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
+        export LATESTTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
         docker build . --file Dockerfile --tag $VERTAG
         docker image tag $VERTAG $LATESTTAG
         docker push $VERTAG
