@@ -12,22 +12,22 @@ jobs:
 
     env:
       DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
-      REPO_NAME: ${{ vars.GITHUB_REPOSITORY }}
-      IMG_VER: "****"
 
     steps:
     - name: Pre check
       run: |
         echo "Precheck"
         export REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
-        echo "Repository: ${{ env.REPO_NAME }}"
+        echo "Repository: $REPO_NAME"
+        echo "REPO_NAME=$REPO_NAME" >> "$GITHUB_ENV"
+
         export IMG_VER=$(date +%Y%m%d%H%M)
-        echo "Image version: ${{ env.IMG_VER }}"
+        echo "Image version: $IMG_VER"
+        echo "IMG_VER=$IMG_VER" >> "$GITHUB_ENV"
+
         echo "Docker username: ${{ env.DOCKER_USERNAME }}"
-        echo "All environments: "
-        env
-        echo "Docker password (test): "
-        echo ${{ secrets.DOCKER_PASSWORD }}
+
+        echo "Docker password (test): ${{ secrets.DOCKER_PASSWORD }}"
     
     - name: Check out code
       uses: actions/checkout@v3
@@ -40,8 +40,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        export VERTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
-        export LATESTTAG=${{ env.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.IMG_VER }}
+        export VERTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
+        export LATESTTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
         docker build . --file Dockerfile --tag $VERTAG
         docker image tag $VERTAG $LATESTTAG
         docker push $VERTAG
