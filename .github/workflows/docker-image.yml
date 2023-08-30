@@ -22,7 +22,7 @@ jobs:
         IMG_VER=$(date +%Y%m%d%H%M)
         echo "Image version: $IMG_VER"
         echo "Docker username: $DOCKER_USERNAME"
-        echo "All environments: 
+        echo "All environments: "
         env
         echo "Docker password (test): "
         echo ${{ secrets.DOCKER_PASSWORD }}
