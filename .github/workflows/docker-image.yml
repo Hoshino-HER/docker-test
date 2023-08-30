@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Mycropython Docker Image CI
 
 on:
   push:
@@ -7,12 +7,29 @@ on:
     branches: [ "main" ]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag micropython-test:$(date +%s)
+    - name: Pre check
+      run: |
+        echo "Precheck"
+        REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
+        echo "Repository: $REPO_NAME"
+        IMG_VER=$(date +%Y%m%d%H%M)
+        echo "Image version: $IMG_VER"
+    
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build . --file Dockerfile --tag ${{ secrets.DOCKER_USERNAME }}/micropython-test:$IMG_VER
+        docker push ${{ secrets.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
+        docker push ${{ secrets.DOCKER_USERNAME }}/$REPO_NAME:latest
