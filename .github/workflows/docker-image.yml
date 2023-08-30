@@ -10,6 +10,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+
     steps:
     - name: Pre check
       run: |
@@ -18,6 +21,11 @@ jobs:
         echo "Repository: $REPO_NAME"
         IMG_VER=$(date +%Y%m%d%H%M)
         echo "Image version: $IMG_VER"
+        echo "Docker username: $DOCKER_USERNAME"
+        echo "All environments: 
+        env
+        echo "Docker password (test): "
+        echo ${{ secrets.DOCKER_PASSWORD }}
     
     - name: Check out code
       uses: actions/checkout@v3
@@ -25,11 +33,11 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v1 
       with:
-        username: ${{ env.DOCKER_USERNAME }}
+        username: $DOCKER_USERNAME
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker image
       run: |
-        docker build . --file Dockerfile --tag ${{ env.DOCKER_USERNAME }}/micropython-test:$IMG_VER
-        docker push ${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
-        docker push ${{ env.DOCKER_USERNAME }}/$REPO_NAME:latest
+        docker build . --file Dockerfile --tag $DOCKER_USERNAME/micropython-test:$IMG_VER
+        docker push $DOCKER_USERNAME/$REPO_NAME:$IMG_VER
+        docker push $DOCKER_USERNAME/$REPO_NAME:latest
