@@ -14,15 +14,12 @@ FROM clone-mpython as build-mpython
 WORKDIR /usr/local/src/micropython/mpy-cross/
 RUN make
 WORKDIR /usr/local/src/micropython/ports/unix/
-RUN make
+RUN make && make install
 
 
-FROM python:3.11-slim
-RUN mkdir -p /usr/local/src
-COPY --from=build-mpython /usr/local/src/micropython/ /usr/local/src/micropython/
-WORKDIR /usr/local/src/micropython/ports/unix/
-RUN make install
-WORKDIR /usr/local
-RUN rm -r /usr/local/src
+FROM python:3.11-slim as install-mpython
+WORKDIR /tmp
+COPY --from=build-mpython /usr/local/micropython /tmp/micropython
+RUN install -d /usr/local/bin && install /tmp/micropython /usr/local/bin/micropython
 
 CMD /usr/local/bin/micropython
