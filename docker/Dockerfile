@@ -10,7 +10,7 @@ WORKDIR /usr/local/src
 RUN git clone --recurse-submodules https://github.com/micropython/micropython.git
 
 
-FROM clone-image as build-mpython
+FROM clone-mpython as build-mpython
 WORKDIR /usr/local/src/micropython/mpy-cross/
 RUN make
 WORKDIR /usr/local/src/micropython/ports/unix/
