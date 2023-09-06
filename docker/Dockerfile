@@ -19,7 +19,7 @@ RUN make && make install
 
 FROM python:3.11-slim as install-mpython
 WORKDIR /tmp
-COPY --from=build-mpython /usr/local/micropython /tmp/micropython
+COPY --from=build-mpython /usr/local/bin/micropython /tmp/micropython
 RUN install -d /usr/local/bin && install /tmp/micropython /usr/local/bin/micropython
 
 CMD /usr/local/bin/micropython
