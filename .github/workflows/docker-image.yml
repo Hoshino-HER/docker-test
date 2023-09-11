@@ -42,7 +42,7 @@ jobs:
       run: |
         export VERTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
         # export LATESTTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:latest
-        docker buildx . --file docker/Dockerfile --tag $VERTAG --platform linux/amd64,linux/arm64
+        docker buildx build --platform linux/amd64,linux/arm64 --file docker/Dockerfile --tag $VERTAG --push .
         # docker image tag $VERTAG latest
-        docker push $VERTAG
+        # docker push $VERTAG
         # docker push $LATESTTAG
