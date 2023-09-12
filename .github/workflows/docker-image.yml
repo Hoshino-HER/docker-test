@@ -28,7 +28,12 @@ jobs:
         echo "Docker username: ${{ env.DOCKER_USERNAME }}"
 
         echo "Docker password (test): ${{ secrets.DOCKER_PASSWORD }}"
-    
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+      with:
+          platforms: linux/arm64
+
     - name: Check out code
       uses: actions/checkout@v3
 
