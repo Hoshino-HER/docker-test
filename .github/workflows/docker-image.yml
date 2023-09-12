@@ -14,39 +14,44 @@ jobs:
       DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
 
     steps:
-    - name: Pre check
-      run: |
-        echo "Precheck"
-        export REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
-        echo "Repository: $REPO_NAME"
-        echo "REPO_NAME=$REPO_NAME" >> "$GITHUB_ENV"
+      - name: prune
+        run: |
+          echo ===== Prune docker images =====
+          docker image prune --force
 
-        export IMG_VER=$(date +%Y%m%d%H%M)
-        echo "Image version: $IMG_VER"
-        echo "IMG_VER=$IMG_VER" >> "$GITHUB_ENV"
+      - name: Pre check
+        run: |
+          echo "Precheck"
+          export REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d '/' -f 2)
+          echo "Repository: $REPO_NAME"
+          echo "REPO_NAME=$REPO_NAME" >> "$GITHUB_ENV"
 
-        echo "Docker username: ${{ env.DOCKER_USERNAME }}"
+          export IMG_VER=$(date +%Y%m%d%H%M)
+          echo "Image version: $IMG_VER"
+          echo "IMG_VER=$IMG_VER" >> "$GITHUB_ENV"
 
-        echo "Docker password (test): ${{ secrets.DOCKER_PASSWORD }}"
-    
-    - name: Check out code
-      uses: actions/checkout@v3
+          echo "Docker username: ${{ env.DOCKER_USERNAME }}"
 
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ env.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
+          echo "Docker password (test): ${{ secrets.DOCKER_PASSWORD }}"
+      
+      - name: Check out code
+        uses: actions/checkout@v3
 
-    - name: Build and push Docker image
-      run: |
-        export VERTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
-        # export LATESTTAG=${{ env.DOCKER_USERNAME }}/$REPO_NAME:latest
-        docker buildx create --name mybuilder
-        docker buildx ls
-        docker buildx use mybuilder
-        docker buildx inspect --bootstrap
-        docker buildx build --platform linux/amd64,linux/arm64 --file docker/Dockerfile --tag $VERTAG --push .
-        # docker image tag $VERTAG latest
-        # docker push $VERTAG
-        # docker push $LATESTTAG
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |              
+            INCLUDE_MONGODBTOOLS=true
+            PREINSTALL_LIBS=true
