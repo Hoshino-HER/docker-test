@@ -79,9 +79,9 @@ jobs:
           context: .
           file: docker/simple.dockerfile
           platforms: linux/amd64
-          push: true
-          tags: ${{ env.DOCKER_USERNAME }}/$REPO_NAME:$IMG_VER
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            INCLUDE_MONGODBTOOLS=true
-            PREINSTALL_LIBS=true
+          # build-args: |
+          #   INCLUDE_MONGODBTOOLS=true
+          #   PREINSTALL_LIBS=true
